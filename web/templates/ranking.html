@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking dos Personagens</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        h1 {
+            margin: 20px 0;
+        }
+        .navbar {
+            background-color: rgba(229, 56, 53, 0.692);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            position: relative;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            margin: 0 10px;
+        }
+        .navbar .icon {
+            width: 30px;
+            height: 30px;
+            background-image: url("{{ url_for('static', filename='images/icon.png') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0 10px;
+        }
+        .icon-img {
+            width: 50px;
+            height: 50px;
+            margin: 0 10px;
+            margin-right: 10px;
+            margin-left: 0;
+            display: inline-block;
+        }
+        .char-img {
+            width: 30px;
+            height: 30px;
+            margin-left: 10px;
+            margin-right: 5px;
+            vertical-align: middle;
+            border-radius: 50%;
+            object-fit: cover; 
+        }
+        .ranking-container {
+            width: 47.5%; /*Usado para colocar o tamanho máximo das barras*/
+            margin: 0 auto;
+        }
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            text-align: left;
+        }
+        .character-name {
+            width: 150px;
+            white-space: nowrap;
+            margin-right: 100px;
+            font-size: 22px;
+            color: white;
+        }
+        .percentage {
+            right: 5px;
+            position: absolute;
+            color: white;
+            top: 50%;
+            font-size: 22px;
+            transform: translateY(-50%);
+        }
+        .bar-container {
+            margin: 20px auto;
+            width: 60%;
+            text-align: center;
+        }
+        .bar {
+            height: 50px;
+            margin: 5px 0;
+            color: white;
+            text-align: left;
+            padding-right: 500px;
+            line-height: 24px;
+            position: relative;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            background: linear-gradient(to right, var(--bar-color) 0%, rgba(29, 27, 27, 0.479) 160%);
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #2e2b2be3;
+        }
+        .bar .character-name {
+            margin-left: 10px;
+        }
+        .bar .bar-icon-bar {
+            width: 20px;
+            height: 20px;
+            background-color: white;
+            border-radius: 50%;
+            margin-right: 5px;
+            margin-left: 10px;
+        }
+        .bar[data-width] {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <a href="/">Confrontos</a>
+        <img src="{{ url_for('static', filename='images/main-icon.png') }}" alt="Ícone" class="icon-img">
+        <a href="/ranking">Ranking</a>
+    </div>
+
+    <h1 style = "text-align: center; margin-left: 40px;">Ranking dos Personagens</h1>
+    
+    <div class="ranking-container">
+
+        {% for character in characters %}
+
+        <div class="ranking-item" style="--bar-color: {{ character.color }}; width: calc({{ character.percentage }} * 100% / {{max_percentage }});">
+
+            <div class="bar">
+                <img src="{{ url_for('static', filename='character_icons/' + character.name + '.webp') }}" alt="{{ character.name }}" class="char-img">
+                <span class="character-name">{{ character.name }}</span>
+                <span class="percentage">{{"%.2f"|format(character.percentage|float)}}%</span>
+            </div>
+
+        </div>
+
+        {% endfor %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confrontos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center
+        }
+        h1 {
+            color: #333;
+            margin-top: 20px;
+        }
+        form {
+            margin: 20px auto;
+        }
+        select, button {
+            padding: 10px;
+            font-size: 16px;
+        }
+        .navbar {
+            background-color: rgba(229, 56, 53, 0.692);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 20px;
+            position: relative;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            margin: 0 10px;
+        }
+        .navbar .icon {
+            width: 30px;
+            height: 30px;
+            background-image: url("{{ url_for('static', filename='images/icon.png') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0 10px;
+        }
+        .icon-img {
+            width: 50px;
+            height: 50px;
+            margin: 0 10px;
+            margin-right: 10px;
+            margin-left: 0;
+            display: inline-block;
+        }
+        .character-preview {
+            display: flex;
+            justify-content: center;
+            gap: 20px; 
+            margin-top: 20px;
+        }
+        .character-box {
+            width: 350px;
+            height: 450px;
+            border: 2px solid #ddd;
+            background-size: cover;
+            background-position: center;
+            background-color: #f0f0f0; 
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <a href="/">Confrontos</a>
+        <img src="{{ url_for('static', filename='images/main-icon.png') }}" alt="Ícone" class="icon-img">
+        <a href="/ranking">Ranking</a>
+    </div>
+    
+    <h1 style = "text-align: center; margin-left: 40px;">Selecione os Personagens</h1>
+
+    <div class="character-preview" style="margin-bottom: 20px;">
+        <div id="character1-preview" class="character-box"></div>
+        <div id="character2-preview" class="character-box"></div>
+    </div>
+
+    <div style="text-align: center;" class="selector">
+        <select id="character1" style="margin-right:58.5px">
+            <option value="" disabled selected>Selecione o personagem 1</option>
+            {% for character in characters %}
+                <option value="{{ character.name }}">{{ character.name }}</option>
+            {% endfor %}
+        </select>
+
+        <select id="character2" style="margin-left: 58.5px; margin-right: 0px;">
+            <option value="" disabled selected>Selecione o personagem 2</option>
+            {% for character in characters %}
+                <option value="{{ character.name }}">{{ character.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="result" style="text-align: center;" class="result"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const character1Select = document.getElementById("character1");
+            const character2Select = document.getElementById("character2");
+            const resultDiv = document.getElementById("result");
+    
+            const values = JSON.parse('{{ characters|tojson }}');
+    
+            const characterMap = {};
+            values.forEach(character => {
+                characterMap[character.name] = parseFloat(character.forca);
+            });
+
+            function calcular(x, alpha = 2.0001, beta = 0) {
+                return 100 * (Math.exp(x * alpha + beta) / (1 + Math.exp(x * alpha + beta)));
+            }
+
+            function determinarVencedor(character1, character2) {
+                delta = Math.abs(characterMap[character1] - characterMap[character2]);
+                taxa = calcular(delta)
+
+                if(characterMap[character1] < characterMap[character2]) {
+                    taxa = 100 - taxa
+                }
+
+                return taxa
+            }
+    
+            function updateResult() {
+                const character1 = character1Select.value;
+                const character2 = character2Select.value;
+    
+                if (character1 && character2) {
+                    if (character1 == character2) {
+                        resultDiv.innerHTML = '<h2>Não selecione o mesmo personagem!</h2>';
+                    } else {
+                        const taxa = determinarVencedor(character1, character2);
+                        if (taxa > 50) {
+                            resultDiv.innerHTML = `<h2>${character1} vence com taxa de vitoria: ${taxa.toFixed(2)}%</h2>`;
+                        }
+                        else {
+                            resultDiv.innerHTML = `<h2>${character2} vence com taxa de vitoria: ${(100 - taxa).toFixed(2)}%</h2>`;
+                        }
+                    }
+                } else {
+                    resultDiv.innerHTML = "";
+                }
+            }
+    
+            character1Select.addEventListener("change", updateResult);
+            character2Select.addEventListener("change", updateResult);
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const character1Select = document.getElementById("character1");
+            const character2Select = document.getElementById("character2");
+            const character1Preview = document.getElementById("character1-preview");
+            const character2Preview = document.getElementById("character2-preview");
+
+            function updateCharacterImage() {
+                const character1 = character1Select.value;
+                const character2 = character2Select.value;
+
+                if (character1) {
+                    character1Preview.style.backgroundImage = `url('/static/character_images/${character1}.avif')`;
+                } else {
+                    character1Preview.style.backgroundImage = '';
+                }
+
+                // Atualiza a imagem de character2, se houver
+                if (character2) {
+                    character2Preview.style.backgroundImage = `url('/static/character_images/${character2}.avif')`;
+                } else {
+                    character2Preview.style.backgroundImage = '';
+                }
+            }
+
+            character1Select.addEventListener("change", updateCharacterImage);
+            character2Select.addEventListener("change", updateCharacterImage);
+        });
+    </script>
+
+</body>
